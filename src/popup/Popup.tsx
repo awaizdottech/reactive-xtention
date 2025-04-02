@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import type { ChromeTabInfo } from "../types/chrome";
 import { getTabsList, goToTab, groupTabs } from ".";
 
-export default function Popup() {
+const Popup = () => {
   const [tabs, setTabs] = useState<ChromeTabInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -72,4 +72,6 @@ export default function Popup() {
       )}
     </div>
   );
-}
+};
+
+export default Popup;
