@@ -1,25 +1,15 @@
 // Type definitions for Chrome extension APIs
-declare namespace Chrome {
-  interface Message {
-    type: string;
-    payload?: any;
-  }
+export type ProductivityTracker = {
+  activeWebsite: string;
+  allWebsites: {
+    [websiteDomain: string]: { visitTimestamp: number; duration: number };
+  };
+};
 
-  interface MessageResponse {
-    success: boolean;
-    data?: any;
-    error?: string;
-  }
-
-  interface TabInfo {
-    id: number;
-    title: string;
-    pathname: string;
-    url: string;
-    windowId: number;
-  }
-}
-
-export type ChromeMessage = Chrome.Message;
-export type ChromeMessageResponse = Chrome.MessageResponse;
-export type ChromeTabInfo = Chrome.TabInfo;
+export type ChromeTabInfo = {
+  id: number;
+  title: string;
+  pathname: string;
+  url: string;
+  windowId: number;
+};

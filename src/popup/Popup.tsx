@@ -15,8 +15,7 @@ export default function Popup() {
     try {
       setLoading(true);
       setError(null);
-      const tabsList = await getTabsList();
-      setTabs(tabsList);
+      setTabs(await getTabsList());
     } catch (err) {
       setError("Failed to load tabs");
       console.error(err);
@@ -25,19 +24,10 @@ export default function Popup() {
     }
   };
 
-  const handleTabClick = async (tab: ChromeTabInfo) => {
+  const handleGroupTabs = () => {
     try {
-      await goToTab(tab.id, tab.windowId);
-      window.close(); // Close popup after navigation
-    } catch (err) {
-      console.error("Failed to navigate to tab:", err);
-    }
-  };
-
-  const handleGroupTabs = async () => {
-    try {
-      await groupTabs();
-      await loadTabs(); // Refresh tabs list
+      groupTabs();
+      loadTabs();
     } catch (err) {
       console.error("Failed to group tabs:", err);
     }
@@ -69,10 +59,10 @@ export default function Popup() {
           <p>Open some docs to see them here!</p>
         </div>
       ) : (
-        <ul className="space-y-2">
+        <ul>
           {tabs.map((tab) => (
             <li key={tab.id}>
-              <button onClick={() => handleTabClick(tab)}>
+              <button onClick={() => goToTab(tab.id, tab.windowId)}>
                 <h3>{tab.title}</h3>
                 <p>{tab.pathname}</p>
               </button>

@@ -7,11 +7,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        // Main extension entry points
         popup: resolve(__dirname, "popup.html"),
         sidepanel: resolve(__dirname, "sidepanel.html"),
-
-        // Background and content scripts
         background: resolve(__dirname, "src/background-scripts/index.ts"),
         contentScript: resolve(__dirname, "src/content-scripts/index.ts"),
       },
@@ -32,12 +29,5 @@ export default defineConfig({
       },
     },
     outDir: "dist",
-  },
-  resolve: {
-    alias: {
-      "@": resolve(__dirname, "./src"),
-      "@components": resolve(__dirname, "./src/components"),
-      "@utils": resolve(__dirname, "./src/utils"),
-    },
   },
 });

@@ -30,7 +30,8 @@
     "sidePanel",
     "tabGroups",
     "tabs",
-    "declarativeNetRequest"
+    "declarativeNetRequest",
+    "idle"
   ],
   "declarative_net_request": {
     "rule_resources": [
