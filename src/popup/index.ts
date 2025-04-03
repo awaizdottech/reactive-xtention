@@ -1,5 +1,17 @@
 import type { ChromeTabInfo } from "../types/chrome";
 
+export const enableElementSelection = () => {
+  chrome.runtime.sendMessage({ action: "enableElementSelection" }, (response) =>
+    console.log(response)
+  );
+};
+
+export const disableElementSelection = () =>
+  chrome.runtime.sendMessage(
+    { action: "disableElementSelection" },
+    (response) => response
+  );
+
 const CHROME_DOC_URLS = [
   "https://developer.chrome.com/docs/webstore/*",
   "https://developer.chrome.com/docs/extensions/*",

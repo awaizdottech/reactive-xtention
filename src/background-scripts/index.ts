@@ -1,11 +1,19 @@
 import { ProductivityTracker } from "../types/chrome";
 
 console.log("Background script running");
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  // console.log(sender);
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+  console.log("Message ", message, " received from popup");
 
-  console.log("Message received:", message);
-  sendResponse({ reply: "Hi from background!" });
+  const activeTabs = await chrome.tabs.query({ active: true });
+  chrome.tabs.sendMessage(activeTabs[0].id!, message, (response) => {
+    sendResponse(response);
+    console.log(
+      "from bg script this is response after sending to active tab content script",
+      response
+    );
+  });
+
+  return true;
 });
 
 // triggers when theres changes inside the tab/page
