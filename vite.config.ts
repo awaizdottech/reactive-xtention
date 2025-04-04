@@ -5,6 +5,7 @@ import { resolve } from "path";
 export default defineConfig({
   plugins: [react()],
   build: {
+    sourcemap: true,
     rollupOptions: {
       input: {
         popup: resolve(__dirname, "popup.html"),

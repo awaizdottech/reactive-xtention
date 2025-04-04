@@ -7,12 +7,6 @@ export const enableElementSelection = () => {
   window.close();
 };
 
-export const disableElementSelection = () =>
-  chrome.runtime.sendMessage(
-    { action: "disableElementSelection" },
-    (response) => response
-  );
-
 const CHROME_DOC_URLS = [
   "https://developer.chrome.com/docs/webstore/*",
   "https://developer.chrome.com/docs/extensions/*",

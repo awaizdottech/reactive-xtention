@@ -1,17 +1,54 @@
 import { ProductivityTracker } from "../types/chrome";
 
 console.log("Background script running");
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-  console.log("Message ", message, " received from popup");
+const STORAGE_KEY = "highestZIndexMap";
 
-  const activeTabs = await chrome.tabs.query({ active: true });
-  chrome.tabs.sendMessage(activeTabs[0].id!, message, (response) => {
-    sendResponse(response);
-    console.log(
-      "from bg script this is response after sending to active tab content script",
-      response
-    );
-  });
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+  console.log("recevied on BG: ", message, sender);
+  // return true;
+
+  if (message.action === "enableElementSelection") {
+    const activeTabs = await chrome.tabs.query({ active: true });
+    chrome.tabs.sendMessage(activeTabs[0].id!, message, (response) => {
+      sendResponse(response);
+      console.log(
+        "from bg script this is response after sending to active tab content script",
+        response
+      );
+    });
+  } else if (message.action === "elementSelected") {
+    chrome.tabs.sendMessage(sender.tab!.id!, message, (response) => {
+      sendResponse("it worked!");
+      console.log(
+        "response recieved from content script on elementSelected - bg",
+        response
+      );
+    });
+  } else if (message.action === "getHighestZIndex") {
+    chrome.storage.local.get(STORAGE_KEY, (data) => {
+      console.log("domo", data);
+      const storedData = data[STORAGE_KEY] || {};
+
+      if (storedData[message.url] !== undefined) {
+        sendResponse({ zIndex: storedData[message.url] });
+        console.log("arigato", storedData[message.url]);
+      } else {
+        chrome.tabs.sendMessage(
+          sender.tab!.id!,
+          { action: "calculateHighestZIndex" },
+          (response) => {
+            const highestZ = response?.zIndex ?? 10;
+            storedData[message.url] = highestZ;
+
+            chrome.storage.local.set({ [STORAGE_KEY]: storedData }, () => {
+              console.log("arigato", highestZ);
+              sendResponse({ zIndex: highestZ });
+            });
+          }
+        );
+      }
+    });
+  }
 
   return true;
 });
@@ -86,7 +123,7 @@ const updateProductivityTrackerForInBrowserChanges = async (url: string) => {
     setproductivityTrackerData(productivityTracker);
   }
 
-  console.log("productivityTracker", productivityTracker);
+  // console.log("productivityTracker", productivityTracker);
 };
 
 // chrome.webRequest.onBeforeRequest.addListener(
