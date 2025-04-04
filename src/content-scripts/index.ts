@@ -1,9 +1,12 @@
 console.log("Content script injected", window.location.origin);
-// chrome.runtime.sendMessage({ greeting: "Hello from content!" }, (response) => {
-//   console.log(response.reply);
-// });
 
-let lasthighlightedElement: HTMLElement;
+const highlightBox = document.createElement("div");
+highlightBox.style.border = "2px solid cyan";
+highlightBox.style.position = "absolute";
+highlightBox.style.display = "none";
+highlightBox.style.pointerEvents = "none"; // Prevent interference
+
+document.querySelector("body")?.appendChild(highlightBox);
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log(
@@ -20,6 +23,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     removeEventListeners();
     sendResponse("disabled");
   }
+
+  return true;
 });
 
 const addEventListeners = () => {
@@ -40,11 +45,13 @@ const mouseMoveListenerCalback = (e: MouseEvent) => {
   const target = e.composedPath()[0] || e.target;
 
   if (target instanceof HTMLElement) {
-    target.style.outline = "2px solid cyan";
+    const { top, left, width, height } = target.getBoundingClientRect();
 
-    if (lasthighlightedElement && lasthighlightedElement !== target)
-      lasthighlightedElement.style.outline = "none";
-    lasthighlightedElement = target;
+    highlightBox.style.top = `${top + window.scrollY}px`;
+    highlightBox.style.left = `${left + window.scrollX}px`;
+    highlightBox.style.width = `${width}px`;
+    highlightBox.style.height = `${height}px`;
+    highlightBox.style.display = "block";
   }
 };
 
@@ -54,17 +61,16 @@ const clickListenerCallback = (e: MouseEvent) => {
 };
 
 window.addEventListener("message", (e) => {
-  // console.log("message received: ", e);
   if (e.data.action === "mouseEnteredIframe") {
-    lasthighlightedElement.style.outline = "none";
+    highlightBox.style.display = "none";
   }
 });
 
 if (window.top !== window.self) {
-  // window.document.addEventListener("mouseenter", () => {
-  //   window.parent.postMessage({ action: "mouseEnteredIframe" }, "*");
-  // });
-  // window.document.addEventListener("mouseleave", () => {
-  //   lasthighlightedElement.style.outline = "none";
-  // });
+  window.document.addEventListener("mouseenter", () => {
+    window.parent.postMessage({ action: "mouseEnteredIframe" }, "*");
+  });
+  window.document.addEventListener("mouseleave", () => {
+    highlightBox.style.display = "none";
+  });
 }

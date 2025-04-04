@@ -4,6 +4,7 @@ export const enableElementSelection = () => {
   chrome.runtime.sendMessage({ action: "enableElementSelection" }, (response) =>
     console.log(response)
   );
+  window.close();
 };
 
 export const disableElementSelection = () =>
