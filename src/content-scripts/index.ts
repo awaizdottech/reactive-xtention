@@ -100,12 +100,23 @@ const mouseMoveListenerCalback = async (e: MouseEvent) => {
   }
 };
 
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) {
+      iconBox.style.display = "none";
+    } else {
+      iconBox.style.display = "block";
+    }
+  });
+});
+
 const clickListenerCallback = async (e: MouseEvent) => {
   console.log("click listener attached", window.document);
 
   highlightBox.style.display = "none";
   console.log(e.target);
   const target = e.composedPath()[0] || e.target;
+  observer.observe(target as Element);
 
   if (target instanceof HTMLElement) {
     const { top, left, width, height } = target.getBoundingClientRect();
@@ -217,7 +228,7 @@ const findUniqueSelector = () => {
 
   // This function will find all the attributes of a given element
   const findAttributes = makeSafe((element: any, elementsOutput: any) => {
-    for (const j = 0; j < (element.attributes || []).length; j++) {
+    for (let j = 0; j < (element.attributes || []).length; j++) {
       const attribute = element.attributes[j];
       if (!elementsOutput.attributes) {
         elementsOutput.attributes = {};
@@ -272,7 +283,7 @@ const findUniqueSelector = () => {
     if (!elementsOutput) {
       elementsOutput = {};
     }
-    for (const i = 0; i < (elements || []).length; i++) {
+    for (let i = 0; i < (elements || []).length; i++) {
       const element = elements[i];
       if (!element) {
         continue;
