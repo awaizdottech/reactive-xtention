@@ -1,56 +1,52 @@
 import { ProductivityTracker } from "../types/chrome";
 
 console.log("Background script running");
-const STORAGE_KEY = "highestZIndexMap";
+const ZINDEX_STORAGE_KEY = "highestZIndexMap";
+export const SELECTOR_STORAGE_KEY = "selectorsWithURL";
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   console.log("recevied on BG: ", message, sender);
-  // return true;
 
+  const activeTabs = await chrome.tabs.query({ active: true });
   if (message.action === "enableElementSelection") {
-    const activeTabs = await chrome.tabs.query({ active: true });
-    chrome.tabs.sendMessage(activeTabs[0].id!, message, (response) => {
-      sendResponse(response);
-      console.log(
-        "from bg script this is response after sending to active tab content script",
-        response
-      );
-    });
+    chrome.tabs.sendMessage(activeTabs[0].id!, message);
   } else if (message.action === "elementSelected") {
-    chrome.tabs.sendMessage(sender.tab!.id!, message, (response) => {
-      sendResponse("it worked!");
-      console.log(
-        "response recieved from content script on elementSelected - bg",
-        response
-      );
-    });
+    const storageData = await chrome.storage.local.get(SELECTOR_STORAGE_KEY);
+    const selectorsWithURL = storageData[SELECTOR_STORAGE_KEY] || {};
+    console.log("onmessage element selected", message, selectorsWithURL);
+
+    if (selectorsWithURL[activeTabs[0].url!])
+      selectorsWithURL[activeTabs[0].url!] = [
+        message.selector,
+        ...selectorsWithURL[activeTabs[0].url!],
+      ];
+    else selectorsWithURL[activeTabs[0].url!] = [message.selector];
+
+    chrome.tabs.sendMessage(sender?.tab?.id!, { ...message, selectorsWithURL });
+    chrome.storage.local.set({ [SELECTOR_STORAGE_KEY]: selectorsWithURL });
   } else if (message.action === "getHighestZIndex") {
-    chrome.storage.local.get(STORAGE_KEY, (data) => {
-      console.log("domo", data);
-      const storedData = data[STORAGE_KEY] || {};
+    const storedZindex = await chrome.storage.local.get(ZINDEX_STORAGE_KEY);
 
-      if (storedData[message.url] !== undefined) {
-        sendResponse({ zIndex: storedData[message.url] });
-        console.log("arigato", storedData[message.url]);
-      } else {
-        chrome.tabs.sendMessage(
-          sender.tab!.id!,
-          { action: "calculateHighestZIndex" },
-          (response) => {
-            const highestZ = response?.zIndex ?? 10;
-            storedData[message.url] = highestZ;
+    console.log("domo", storedZindex);
+    const storedData = storedZindex[ZINDEX_STORAGE_KEY] || {};
 
-            chrome.storage.local.set({ [STORAGE_KEY]: storedData }, () => {
-              console.log("arigato", highestZ);
-              sendResponse({ zIndex: highestZ });
-            });
-          }
-        );
-      }
-    });
+    if (storedData[message.url] !== undefined) {
+      sendResponse({ zIndex: storedData[message.url] });
+      console.log("arigato", storedData[message.url]);
+      return true;
+    } else {
+      const response = await chrome.tabs.sendMessage(sender.tab!.id!, {
+        action: "calculateHighestZIndex",
+      });
+
+      const highestZ = response?.zIndex ?? 10;
+      console.log("arigato", highestZ);
+      sendResponse({ zIndex: highestZ });
+      storedData[message.url] = highestZ;
+      chrome.storage.local.set({ [ZINDEX_STORAGE_KEY]: storedData });
+      return true;
+    }
   }
-
-  return true;
 });
 
 // triggers when theres changes inside the tab/page
@@ -62,10 +58,9 @@ chrome.tabs.onUpdated.addListener(
 );
 
 // triggers when there's tab change
-chrome.tabs.onActivated.addListener(() => {
-  chrome.tabs.query({ active: true }, (tabs) => {
-    updateProductivityTrackerForInBrowserChanges(tabs[0].url!);
-  });
+chrome.tabs.onActivated.addListener(async () => {
+  const tabs = await chrome.tabs.query({ active: true });
+  updateProductivityTrackerForInBrowserChanges(tabs[0].url!);
 });
 
 // triggers when user locks screen

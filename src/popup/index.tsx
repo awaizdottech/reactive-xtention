@@ -51,7 +51,9 @@ const Popup = () => {
 
   return (
     <div>
-      <Button onClick={enableElementSelection}>Enable Element Selection</Button>
+      <Button variant="contained" onClick={enableElementSelection}>
+        Enable Element Selection
+      </Button>
       <div>
         <h1>Chrome Docs Manager</h1>
         <button onClick={handleGroupTabs}>Group Tabs</button>
