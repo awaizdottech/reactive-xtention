@@ -12,6 +12,7 @@ highlightBox.style.border = "2px solid cyan";
 highlightBox.style.position = "absolute";
 highlightBox.style.display = "none";
 highlightBox.style.pointerEvents = "none";
+
 export const tooltipBox = document.createElement("div");
 tooltipBox.style.position = "absolute";
 tooltipBox.style.background = "black";
@@ -22,6 +23,7 @@ tooltipBox.style.fontSize = "12px";
 tooltipBox.style.whiteSpace = "nowrap";
 tooltipBox.style.display = "none";
 tooltipBox.textContent = "I am tooltip";
+
 export const iconBox = document.createElement("div");
 iconBox.innerHTML = "⭐";
 iconBox.style.position = "absolute";
@@ -38,7 +40,7 @@ document.body.appendChild(tooltipBox);
 
 attachStoredTooltips();
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
   if (message.action === "calculateHighestZIndex") {
     const highestZ = getHighestZIndexFromTab();
     sendResponse({ zIndex: highestZ });
@@ -65,18 +67,31 @@ if (zIndex !== undefined) {
   tooltipBox.style.zIndex = highestZIndex.toString();
 }
 
-window.addEventListener("message", (e) => {
-  if (e.data.action === "mouseEnteredIframe") {
-    highlightBox.style.display = "none";
-  }
-});
+window.addEventListener(
+  "message",
+  (e) => {
+    if (e.data.action === "mouseEnteredIframe") {
+      highlightBox.style.display = "none";
+    }
+  },
+  { capture: true }
+);
 
 if (window.top !== window.self) {
-  window.document.addEventListener("mouseenter", (e) => {
-    window.parent.postMessage({ action: "mouseEnteredIframe" }, "*");
-    e.stopPropagation();
-  });
-  window.document.addEventListener("mouseleave", () => {
-    highlightBox.style.display = "none";
-  });
+  window.document.addEventListener(
+    "mouseenter",
+    (e) => {
+      window.parent.postMessage({ action: "mouseEnteredIframe" }, "*");
+      e.stopPropagation();
+    },
+    { capture: true }
+  );
+
+  window.document.addEventListener(
+    "mouseleave",
+    () => {
+      highlightBox.style.display = "none";
+    },
+    { capture: true }
+  );
 }

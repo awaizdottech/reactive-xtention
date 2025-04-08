@@ -1,4 +1,4 @@
-import type { ChromeTabInfo } from "../types/chrome";
+import type { ChromeTabInfo } from "../../types/chrome";
 
 export const enableElementSelection = () => {
   chrome.runtime.sendMessage({ action: "enableElementSelection" });

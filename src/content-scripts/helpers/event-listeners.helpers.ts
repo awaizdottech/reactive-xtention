@@ -33,10 +33,8 @@ const mouseMoveListenerCalback = async (e: MouseEvent) => {
 };
 
 const clickListenerCallback = async (e: MouseEvent) => {
-  console.log("click listener attached", window.document);
-
   highlightBox.style.display = "none";
-  console.log(e.target);
+  console.log("selected element", e.target);
   const target = e.composedPath()[0] || e.target;
 
   if (target instanceof HTMLElement) {
