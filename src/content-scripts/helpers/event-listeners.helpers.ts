@@ -1,7 +1,11 @@
-import { finder } from "@medv/finder";
-import { highlightBox, iconBox } from "..";
-import { hookIntersectionObserver } from "./intersection-observer.helpers";
-import { attachTooltip } from "./tooltip.helpers";
+// import { finder } from "@medv/finder";
+import {
+  highlightBox,
+  // iconBox
+} from "..";
+import { mountTooltipManager } from "./mountTooltipManager";
+// import { hookIntersectionObserver } from "./intersection-observer.helpers";
+// import { attachTooltip } from "./tooltip.helpers";
 
 export const addEventListeners = () => {
   document.addEventListener("mousemove", mouseMoveListenerCalback, {
@@ -10,14 +14,14 @@ export const addEventListeners = () => {
   document.addEventListener("click", clickListenerCallback, { capture: true });
 };
 
-export const removeEventListeners = () => {
-  document.removeEventListener("mousemove", mouseMoveListenerCalback, {
-    capture: true,
-  });
-  document.removeEventListener("click", clickListenerCallback, {
-    capture: true,
-  });
-};
+// export const removeEventListeners = () => {
+//   document.removeEventListener("mousemove", mouseMoveListenerCalback, {
+//     capture: true,
+//   });
+//   document.removeEventListener("click", clickListenerCallback, {
+//     capture: true,
+//   });
+// };
 
 const mouseMoveListenerCalback = async (e: MouseEvent) => {
   const target = e.composedPath()[0] || e.target;
@@ -35,17 +39,18 @@ const mouseMoveListenerCalback = async (e: MouseEvent) => {
 const clickListenerCallback = async (e: MouseEvent) => {
   highlightBox.style.display = "none";
   console.log("selected element", e.target);
-  const target = e.composedPath()[0] || e.target;
+  mountTooltipManager();
+  // const target = e.composedPath()[0] || e.target;
 
-  if (target instanceof HTMLElement) {
-    const { top, left, width, height } = target.getBoundingClientRect();
-    attachTooltip(top, left, width, height);
-    hookIntersectionObserver(target as Element, iconBox);
-  }
+  // if (target instanceof HTMLElement) {
+  //   const { top, left, width, height } = target.getBoundingClientRect();
+  //   attachTooltip(top, left, width, height);
+  // hookIntersectionObserver(target as Element, iconBox);
+  // }
 
-  console.log("Content script: send message to background");
-  chrome.runtime.sendMessage({
-    action: "elementSelected",
-    selector: finder(target as Element),
-  });
+  // console.log("Content script: send message to background");
+  // chrome.runtime.sendMessage({
+  //   action: "elementSelected",
+  //   selector: finder(target as Element),
+  // });
 };
