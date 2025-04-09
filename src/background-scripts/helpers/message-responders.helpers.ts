@@ -1,4 +1,4 @@
-// const SELECTOR_STORAGE_KEY = "selectorsWithURL";
+const SELECTOR_STORAGE_KEY = "selectorsWithURL";
 // const ZINDEX_STORAGE_KEY = "highestZIndexMap";
 
 export const enableElementSelectionResponder = async (message: any) => {
@@ -6,25 +6,33 @@ export const enableElementSelectionResponder = async (message: any) => {
   chrome.tabs.sendMessage(activeTabs[0].id!, message);
 };
 
-// export const elementSelectedResponder = async (
-//   message: any,
+export const elementSelectedResponder = async (
+  message: any,
+  sender: chrome.runtime.MessageSender
+) => {
+  const activeTabs = await chrome.tabs.query({ active: true });
+  const activeTabURL = new URL(activeTabs[0].url!);
+  const storageData = await chrome.storage.local.get(SELECTOR_STORAGE_KEY);
+  const selectorsWithURL = storageData[SELECTOR_STORAGE_KEY] || {};
+  console.log("onmessage element selected", message, selectorsWithURL);
 
-//   sender: chrome.runtime.MessageSender
-// ) => {
-//   const storageData = await chrome.storage.local.get(SELECTOR_STORAGE_KEY);
-//   const selectorsWithURL = storageData[SELECTOR_STORAGE_KEY] || {};
-//   console.log("onmessage element selected", message, selectorsWithURL);
+  let currentTabSelectors =
+    selectorsWithURL[`${activeTabURL.origin}${activeTabURL.pathname}`];
+  if (currentTabSelectors) {
+    if (!currentTabSelectors.includes(message.selector)) {
+      currentTabSelectors = [message.selector, ...currentTabSelectors];
+    }
+  } else currentTabSelectors = [message.selector];
 
-//   if (selectorsWithURL[activeTabs[0].url!])
-//     selectorsWithURL[activeTabs[0].url!] = [
-//       message.selector,
-//       ...selectorsWithURL[activeTabs[0].url!],
-//     ];
-//   else selectorsWithURL[activeTabs[0].url!] = [message.selector];
+  chrome.tabs.sendMessage(sender?.tab?.id!, message);
 
-//   chrome.tabs.sendMessage(sender?.tab?.id!, { ...message, selectorsWithURL });
-//   chrome.storage.local.set({ [SELECTOR_STORAGE_KEY]: selectorsWithURL });
-// };
+  chrome.storage.local.set({
+    [SELECTOR_STORAGE_KEY]: {
+      ...selectorsWithURL,
+      [`${activeTabURL.origin}${activeTabURL.pathname}`]: currentTabSelectors,
+    },
+  });
+};
 
 // export const getHighestZIndexResponder = async (
 //   message: any,

@@ -36,14 +36,19 @@ const SELECTOR_STORAGE_KEY = "selectorsWithURL";
 //   };
 // };
 
-export const fetchSelector = async () => {
+export const fetchSelectors = async () => {
   const data = await chrome.storage.local.get(SELECTOR_STORAGE_KEY);
   const selectorsWithURL = data[SELECTOR_STORAGE_KEY] || {};
-  const storedSelectors: string[] =
-    selectorsWithURL[window.location.href] || [];
-  if (storedSelectors.length > 0) {
-    console.log("fetchSelector roars", storedSelectors);
-    return storedSelectors[0];
+  const selectorsForCurrentTab: string[] =
+    selectorsWithURL[`${window.location.origin}${window.location.pathname}`] ||
+    [];
+  if (selectorsForCurrentTab.length > 0) {
+    // console.log(
+    //   "fetchSelectors roars",
+    //   selectorsForCurrentTab,
+    //   window.top !== window.self ? "iframe" : "main"
+    // );
+    return selectorsForCurrentTab;
   }
   return null;
 };

@@ -1,8 +1,11 @@
 import ReactDOM from "react-dom/client";
-import TooltipManager from "../components/TooltipManager";
+import TooltipManager from "../components/TooltipsManager";
 
 export const mountTooltipManager = () => {
-  console.log("mountTooltipManager roars");
+  console.log(
+    "mountTooltipManager roars",
+    window.top !== window.self ? "iframe" : "main"
+  );
 
   const container = document.createElement("div");
   container.id = "tooltip-mount";

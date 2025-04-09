@@ -2,8 +2,9 @@
 // import { getHighestZIndexFromTab } from "./helpers/z-index.helpers";
 import {
   addEventListeners,
-  // removeEventListeners,
+  removeEventListeners,
 } from "./helpers/event-listeners.helpers";
+import { mountTooltipManager } from "./helpers/mountTooltipManager";
 
 // console.log("Content script injected", window.location.origin);
 
@@ -12,6 +13,7 @@ highlightBox.style.border = "2px solid cyan";
 highlightBox.style.position = "absolute";
 highlightBox.style.display = "none";
 highlightBox.style.pointerEvents = "none";
+document.body.appendChild(highlightBox);
 
 // export const tooltipBox = document.createElement("div");
 // tooltipBox.style.position = "absolute";
@@ -34,26 +36,22 @@ highlightBox.style.pointerEvents = "none";
 // iconBox.style.borderRadius = "50%";
 // iconBox.style.boxShadow = "0 0 5px rgba(0,0,0,0.3)";
 
-document.body.appendChild(highlightBox);
 // document.body.appendChild(iconBox);
 // document.body.appendChild(tooltipBox);
 
 // attachStoredTooltips();
 
-chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
+chrome.runtime.onMessage.addListener((message) => {
   //   if (message.action === "calculateHighestZIndex") {
   //     const highestZ = getHighestZIndexFromTab();
   //     sendResponse({ zIndex: highestZ });
   //     return true;
   //   } else
-  if (message.action == "enableElementSelection") {
-    addEventListeners();
-  }
-  //  else if (message.action == "elementSelected") {
-  //     removeEventListeners();
-  //     console.log("Data received on elemetnt selection: ", message);
-  //   }
+  if (message.action == "enableElementSelection") addEventListeners();
+  else if (message.action == "elementSelected") removeEventListeners();
 });
+
+const SELECTOR_STORAGE_KEY = "selectorsWithURL";
 
 // const { zIndex } = await chrome.runtime.sendMessage({
 //   action: "getHighestZIndex",
@@ -80,6 +78,7 @@ window.addEventListener(
 );
 
 if (window.top !== window.self) {
+  // iframes
   window.document.addEventListener(
     "mouseenter",
     (e) => {
@@ -96,4 +95,18 @@ if (window.top !== window.self) {
     },
     { capture: true }
   );
+} else {
+  // main window
+  mountTooltipManager();
+
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== "local") return;
+
+    const changed = changes[SELECTOR_STORAGE_KEY];
+    if (changed) {
+      const currentTabKey = `${window.location.origin}${window.location.pathname}`;
+      if (changed.oldValue[currentTabKey] !== changed.newValue[currentTabKey])
+        mountTooltipManager();
+    }
+  });
 }
