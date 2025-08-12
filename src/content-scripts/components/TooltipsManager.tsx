@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react";
-import { fetchSelectors } from "../helpers/tooltip.helpers";
+import { getAnchors } from "../helpers/tooltip.helpers";
 import TooltipPopper from "./TooltipPopper";
 
 const TooltipsManager = () => {
-  const [selectors, setSelectors] = useState<string[] | null>(null);
-  console.log(
-    "TooltipsManager roars",
-    window.top !== window.self ? "iframe" : "main"
-  );
+  const [anchors, setAnchors] = useState<Element[] | null>(null);
+  // console.log(
+  //   "TooltipsManager roars",
+  //   window.top !== window.self ? "iframe" : "main"
+  // );
 
   useEffect(() => {
     const updateSelectors = async () => {
-      const fetchedSelectors = await fetchSelectors();
-      console.log(
-        "updateSelectors roars",
-        fetchedSelectors,
-        window.top !== window.self ? "iframe" : "main"
-      );
-      setSelectors(fetchedSelectors);
+      const fetchedAnchors = await getAnchors();
+      // console.log(
+      //   "updateSelectors roars",
+      //   fetchedAnchors,
+      //   window.top !== window.self ? "iframe" : "main"
+      // );
+      setAnchors(fetchedAnchors);
     };
 
     updateSelectors();
@@ -35,12 +35,12 @@ const TooltipsManager = () => {
     return () => observer.disconnect();
   }, []);
 
-  return !selectors ? (
+  return !anchors ? (
     <> "loading..."</>
   ) : (
     <>
-      {selectors.map((selector: string) => (
-        <TooltipPopper selector={selector} />
+      {anchors.map((anchor: Element) => (
+        <TooltipPopper anchor={anchor} />
       ))}
     </>
   );

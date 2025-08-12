@@ -40,14 +40,45 @@ const clickListenerCallback = async (e: MouseEvent) => {
   console.log("selected element", e.target);
   const target = e.composedPath()[0] || e.target;
 
-  // if (target instanceof HTMLElement) {
-  //   const { top, left, width, height } = target.getBoundingClientRect();
-  //   attachTooltip(top, left, width, height);
-  // hookIntersectionObserver(target as Element, iconBox);
-  // }
+  if (window.top == window.self) {
+    // if (target instanceof HTMLElement) {
+    //   const { top, left, width, height } = target.getBoundingClientRect();
+    //   attachTooltip(top, left, width, height);
+    // }
 
-  chrome.runtime.sendMessage({
-    action: "elementSelected",
-    selector: finder(target as Element),
-  });
+    chrome.runtime.sendMessage({
+      action: "elementSelected",
+      selector: finder(target as Element),
+    });
+  } else {
+    // console.log(
+    //   "domo",
+    //   window.location.origin,
+    //   target,
+    //   {
+    //     action: "elementSelected",
+    //     selector: finder(target as Element),
+    //     targetPosition: { x: e.clientX, y: e.clientY },
+    //   },
+    //   window.parent,
+    //   window.top,
+    //   chrome.runtime
+    // );
+
+    window.top?.postMessage(
+      {
+        action: "elementSelected",
+        targetRect: (target as Element).getBoundingClientRect(),
+      },
+      "*"
+    );
+
+    window.parent.postMessage(
+      {
+        action: "elementSelected",
+        targetRect: (target as Element).getBoundingClientRect(),
+      },
+      "*"
+    );
+  }
 };

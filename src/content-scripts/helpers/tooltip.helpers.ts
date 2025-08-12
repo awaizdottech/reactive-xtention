@@ -36,7 +36,7 @@ const SELECTOR_STORAGE_KEY = "selectorsWithURL";
 //   };
 // };
 
-export const fetchSelectors = async () => {
+const fetchSelectors = async () => {
   const data = await chrome.storage.local.get(SELECTOR_STORAGE_KEY);
   const selectorsWithURL = data[SELECTOR_STORAGE_KEY] || {};
   const selectorsForCurrentTab: string[] =
@@ -50,5 +50,15 @@ export const fetchSelectors = async () => {
     // );
     return selectorsForCurrentTab;
   }
-  return null;
+  return [];
+};
+
+export const getAnchors = async () => {
+  const selectors = await fetchSelectors();
+  return selectors
+    .map((selector) => {
+      const element = document.querySelector(selector);
+      if (element) return element;
+    })
+    .filter((el) => el !== undefined);
 };

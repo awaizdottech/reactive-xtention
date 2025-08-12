@@ -1,7 +1,7 @@
 import {
-  elementSelectedResponder,
-  enableElementSelectionResponder,
-  // getHighestZIndexResponder,
+  elementSelectedHandler,
+  enableElementSelectionHandler,
+  // getHighestZIndexHandler,
 } from "./helpers/message-responders.helpers";
 
 // console.log("Background script running");
@@ -9,11 +9,11 @@ import {
 chrome.runtime.onMessage.addListener(async (message, sender) => {
   //   console.log("recevied on BG: ", message, sender);
   if (message.action === "enableElementSelection") {
-    enableElementSelectionResponder(message);
+    enableElementSelectionHandler(message);
   } else if (message.action === "elementSelected") {
-    elementSelectedResponder(message, sender);
+    elementSelectedHandler(message, sender);
   }
   // else if (message.action === "getHighestZIndex") {
-  //     getHighestZIndexResponder(message, sender, sendResponse);
+  //     getHighestZIndexHandler(message, sender, sendResponse);
   //   }
 });

@@ -72,6 +72,37 @@ window.addEventListener(
   (e) => {
     if (e.data.action === "mouseEnteredIframe") {
       highlightBox.style.display = "none";
+    } else {
+      console.log("coming from iframes", e.data);
+      console.log("context", window.document);
+
+      const senderWindow = e.source as Window;
+      console.log("senderWindow", senderWindow);
+
+      // Find the iframe whose contentWindow matches the sender
+      const matchedIframe = Array.from(
+        document.querySelectorAll("iframe")
+      ).find((iframe) => {
+        console.log("iframe", iframe);
+
+        iframe.contentWindow === senderWindow;
+      });
+
+      if (!matchedIframe) {
+        console.warn("Iframe source not found for received message.");
+        return;
+      }
+
+      const iframeRect = matchedIframe.getBoundingClientRect();
+      console.log(iframeRect);
+
+      // const targetRect = e.data.payload.rect;
+
+      // const absoluteTop = iframeRect.top + targetRect.top;
+      // const absoluteLeft = iframeRect.left + targetRect.left;
+
+      // Now place your tooltip here:
+      // showTooltipAt(absoluteLeft, absoluteTop);
     }
   },
   { capture: true }

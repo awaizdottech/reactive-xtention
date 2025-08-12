@@ -3,11 +3,10 @@ import CustomPopper from "./CustomPopper";
 import CustomTooltip from "./CustomTooltip";
 
 interface TooltipPopperProps {
-  selector: string;
+  anchor: Element;
 }
 
-const TooltipPopper = ({ selector }: TooltipPopperProps) => {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+const TooltipPopper = ({ anchor }: TooltipPopperProps) => {
   const [open, setOpen] = useState(false);
   // console.log(
   //   "TooltipPopper roars",
@@ -17,36 +16,33 @@ const TooltipPopper = ({ selector }: TooltipPopperProps) => {
 
   useEffect(() => {
     (() => {
-      const el = document.querySelector(selector);
       // console.log(
       //   "tryAttach roars",
       //   selector,
       //   el,
       //   window.top !== window.self ? "iframe" : "main"
       // );
-      if (el instanceof HTMLElement) {
-        setAnchorEl(el);
-        setOpen(true);
 
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) {
-              setOpen(false);
-            } else {
-              setOpen(true);
-            }
-          });
+      setOpen(true);
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) {
+            setOpen(false);
+          } else {
+            setOpen(true);
+          }
         });
+      });
 
-        observer.observe(el);
+      observer.observe(anchor);
 
-        return () => observer.unobserve(el);
-      }
+      return () => observer.unobserve(anchor);
     })();
   }, []);
 
   return (
-    <CustomPopper anchorEl={anchorEl} open={open}>
+    <CustomPopper anchorEl={anchor as HTMLElement} open={open}>
       <CustomTooltip text="I am Tooltip" />
     </CustomPopper>
   );

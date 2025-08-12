@@ -1,12 +1,12 @@
 const SELECTOR_STORAGE_KEY = "selectorsWithURL";
 // const ZINDEX_STORAGE_KEY = "highestZIndexMap";
 
-export const enableElementSelectionResponder = async (message: any) => {
+export const enableElementSelectionHandler = async (message: any) => {
   const activeTabs = await chrome.tabs.query({ active: true });
   chrome.tabs.sendMessage(activeTabs[0].id!, message);
 };
 
-export const elementSelectedResponder = async (
+export const elementSelectedHandler = async (
   message: any,
   sender: chrome.runtime.MessageSender
 ) => {
@@ -34,7 +34,7 @@ export const elementSelectedResponder = async (
   });
 };
 
-// export const getHighestZIndexResponder = async (
+// export const getHighestZIndexHandler = async (
 //   message: any,
 //   sender: chrome.runtime.MessageSender,
 //   sendResponse: (response?: any) => void

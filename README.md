@@ -17,3 +17,4 @@
 #TODOS:
 
 - add mutation observer to detect changes in the DOM & update the highest zindex
+- rendering of react components
